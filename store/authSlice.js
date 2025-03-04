@@ -43,7 +43,7 @@ export function register(data){
 }
 
 export function login(data){
-      return async function registerThunk(dispatch){
+      return async function loginThunk(dispatch){
         dispatch(setStatus(STATUSES.LOADING))
       try {
             const response = await axios.post('https://react30.onrender.com/api/user/login',data)    

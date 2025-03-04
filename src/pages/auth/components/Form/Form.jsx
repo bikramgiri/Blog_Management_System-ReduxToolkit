@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-const Form = ({type,onSubmit}) => {
+const Form = ({type,onSubmit,user}) => {
 	const [data,setData] = useState({
 		email : '',
 		username : '',
@@ -32,6 +32,8 @@ const Form = ({type,onSubmit}) => {
                                     {type === 'Login' ? 'Login here to continue...' : 'Register here to continue...'}
                                     </h1>
 				</div>
+				{type === 'Login' && `Hello, ${user?.username}`}
+				{/* <p>Hello, {user?.email}</p> */}
 				<form onSubmit={handleSubmit}>
 			      <div className="divide-y divide-gray-200">
 					<div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
@@ -76,6 +78,7 @@ const Form = ({type,onSubmit}) => {
 Form.propTypes = {
 	type: PropTypes.string.isRequired,
 	onSubmit: PropTypes.func.isRequired,
+	user: PropTypes.object.isRequired,
     }
 
 export default Form
