@@ -20,9 +20,10 @@ const Register = () => {
   if(status === STATUSES.SUCCESS){
     navigate('/login')
     dispatch(setStatus(null))
-  }else{
-    navigate('/register')
   }
+  // else{
+  //   navigate('/register')
+  // }
   },[status])
 
   return (

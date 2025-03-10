@@ -39,6 +39,7 @@ export function register(data){
              dispatch(setStatus(STATUSES.ERROR))
             }
           } catch (error) {
+            console.log(error?.response?.data?.message)
             dispatch(setStatus(STATUSES.ERROR))
           }
       }
@@ -56,6 +57,7 @@ export function login(data){
             dispatch(setStatus(STATUSES.ERROR))
       }
       } catch (error) {
+            console.log(error?.response?.data?.message)
             dispatch(setStatus(STATUSES.ERROR))
       }
   }

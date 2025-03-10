@@ -1,76 +1,103 @@
 import {createSlice} from '@reduxjs/toolkit'
-// import axios from 'axios'
 import STATUSES from '../src/globals/status/statuses'
 import API from '../src/http'
+import { createSelector } from 'reselect'
 
 const blogSlice = createSlice({
       name : 'blog',
       initialState : {
-            data : null,
-            status : null
+            blogs : [],
+            singleBlog: null,
+            status : "idle",
+            deleteStatus: null
       },
-      reducers : {
-            setStatus(state,action){
-                  state.status = action.payload
-            },
-            setBlog(state,action){
-                  state.data = action.payload
-            }
+      reducers: {
+           setStatus(state, action) {
+           state.status = action.payload
+         },
+            setBlogs(state, action) {
+            state.blogs = action.payload // Ensure this matches your `useSelector`
+          },
+          setDeleteStatus(state, action){
+            state.deleteStatus = action.payload;
+          },
+          setSingleBlog(state, action) {
+            state.singleBlog = action.payload; // Stores single blog separately
+          }
       }
-})
+})  
 
-export const {setStatus,setBlog} = blogSlice.actions
+export const {setStatus,setBlogs,setDeleteStatus,setSingleBlog} = blogSlice.actions
 export default blogSlice.reducer
 
+// Memoized Selector for all blogs
+export const selectBlogs = createSelector(
+      (state) => state.blog.blogs,
+      (blogs) => blogs.slice() // Ensure it returns a stable reference
+    );
+    
+    // Memoized Selector for a single blog
+    export const selectSingleBlog = createSelector(
+      (state) => state.blog.singleBlog,
+      (singleBlog) => singleBlog || {} // Ensure it returns the same empty object if null
+    )
+
+// add blog
 export function addBlog(data){
       return async function addBlogThunk(dispatch){
-            dispatch(setStatus(STATUSES.LOADING))
+       dispatch(setStatus(STATUSES.LOADING))
          try {
             const response = await API.post('blog', data,{
                   headers : {
+                        'Authorization': localStorage.getItem('jwt'),
                         "Content-Type" : "multipart/form-data"
                   }
             }) 
             if(response.status === 201){
-
              dispatch(setStatus(STATUSES.SUCCESS))
             }else{
              dispatch(setStatus(STATUSES.ERROR))
             }
           } catch (error) {
+            console.log(error?.response?.data?.message)
             dispatch(setStatus(STATUSES.ERROR))
           }
       }
 }
 
-
+// fetch blog
 export function fetchBlog(){
       return async function fetchBlogThunk(dispatch){
         dispatch(setStatus(STATUSES.LOADING))
       try {
-            const response = await API.get('blog')    
-      if(response.status === 200 && response.data.blog.length > 0){
-            dispatch(setBlog(response.data.blog))
+            const response = await API.get('blog')
+            console.log("Fetched Blogs:", response.data) // Debug: Check API response
+
+      if(response.status === 200 && Array.isArray(response.data.data)){
+            dispatch(setBlogs(response.data.data))
             dispatch(setStatus(STATUSES.SUCCESS))
       }else{
+            dispatch(setBlogs([]))
             dispatch(setStatus(STATUSES.ERROR))
       }
       } catch (error) {
+            console.log("Error fetching blogs:", error?.response?.data?.message)            
+            dispatch(setBlogs([])) // Clear state to avoid stale data
             dispatch(setStatus(STATUSES.ERROR))
       }
   }
 }
 
-
-export function deteteBlog(id,token){
-      return async function deteteBlogThunk(dispatch){
+// Delete blog
+export function deleteBlog(id){
+      return async function deleteBlogThunk(dispatch){
         dispatch(setStatus(STATUSES.LOADING))
       try {
-            const response = await API.delete(`blog/${id}`,{
-                  headers : {
-                        token : token
+            const response = await API.delete(`blog/${id}`, {
+                  headers: { 
+                        'Authorization': localStorage.getItem('jwt') 
                   }
-            })    
+                })    
       if(response.status === 200){
 
             dispatch(setStatus(STATUSES.SUCCESS))
@@ -78,7 +105,54 @@ export function deteteBlog(id,token){
             dispatch(setStatus(STATUSES.ERROR))
       }
       } catch (error) {
+            console.log(error?.response?.data?.message)
             dispatch(setStatus(STATUSES.ERROR))
       }
   }
+}
+
+
+// edit blog
+export function editBlog(id, data) {
+      return async function editBlogThunk(dispatch) {
+        dispatch(setStatus(STATUSES.LOADING))
+        try {
+          const response = await API.put(`blog/${id}`, data, {
+            headers: {
+                  "Authorization" : localStorage.getItem('jwt'),
+                  "Content-Type" : "multipart/form-data"
+            }
+          })
+    
+          if (response.status === 200) {
+            dispatch(setStatus(STATUSES.SUCCESS))
+          } else {
+            dispatch(setStatus(STATUSES.ERROR))
+          }
+        } catch (error) {
+          console.log(error?.response?.data?.message)
+          dispatch(setStatus(STATUSES.ERROR))
+        }
+      }
+    }
+    
+//fetch single blog
+export function fetchSingleBlog(id) {
+      return async function fetchSingleBlogThunk(dispatch) {
+            dispatch(setStatus(STATUSES.LOADING))
+        try {
+          const response = await API.get(`blog/${id}`)
+          console.log("Fetched Single Blog:", response.data) // Debug log
+
+          if (response.status === 200) {
+            dispatch(setSingleBlog(response.data.data))//
+            dispatch(setStatus(STATUSES.SUCCESS))
+          } else {
+            dispatch(setStatus(STATUSES.ERROR))
+          }
+        } catch (error) {
+            console.log("Error fetching single blog:", error?.response?.data?.message)
+            dispatch(setStatus(STATUSES.ERROR))
+        }
+      }
 }

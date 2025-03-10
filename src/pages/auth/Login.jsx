@@ -20,9 +20,10 @@ const Login = () => {
   if(status === STATUSES.SUCCESS){
     navigate('/')
     dispatch(setStatus(null))
-  }else{
-    navigate('/login')
   }
+  // else{
+  //   navigate('/login')
+  // }
   },[status])
 
   return (
