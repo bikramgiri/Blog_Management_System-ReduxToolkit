@@ -5,9 +5,10 @@ import Form from './components/form/Form'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 import { editBlog, setStatus } from '../../../store/blogSlice'
+import STATUSES from '../../globals/status/statuses'
 
 const EditBlog = () => {
-  const {inputData,editStatus} = useSelector(state => state.blog)
+  const {inputData,status} = useSelector(state => state.blog)
   const {id} = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -28,17 +29,16 @@ const EditBlog = () => {
     }))
   }
 
-  const handleEditBlog = (e) => {
-    e.preventDefault()
+  const handleEditBlog = () => {
     dispatch(editBlog(blog,id))
   }
   
   useEffect(()=> {
-    if(editStatus === true){
+    if(status === STATUSES.SUCCESS  ){
       dispatch(setStatus(null))
       navigate(`blog/${id}`)
     }
-  },[editStatus, dispatch, navigate, id])
+  },[status, dispatch, navigate, id])
   
   return (
     <Layout>

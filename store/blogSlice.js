@@ -46,16 +46,26 @@ export const selectBlogs = createSelector(
 export function addBlog(data){
       return async function addBlogThunk(dispatch){
        dispatch(setStatus(STATUSES.LOADING))
+
+       const token = localStorage.getItem('jwt');
+
+       if (!token) {
+         // Token is not found, handle the error
+         dispatch(setStatus(STATUSES.ERROR));
+         console.log('No token found. Please login.');
+         return; // Exit the function as token is required for the request
+       }
          try {
             const response = await API.post('blog', data,{
                   headers : {
-                        'Authorization': localStorage.getItem('jwt'),
+                        'Authorization': `${token}`,  
                         "Content-Type" : "multipart/form-data"
                   }
             }) 
             if(response.status === 201){
              dispatch(setStatus(STATUSES.SUCCESS))
             }else{
+              console.log("Failed to create blog.");
              dispatch(setStatus(STATUSES.ERROR))
             }
           } catch (error) {
@@ -117,7 +127,7 @@ export function editBlog(id, data) {
       return async function editBlogThunk(dispatch) {
         dispatch(setStatus(STATUSES.LOADING))
         try {
-          const response = await API.put(`blog/${id}`, data, {
+          const response = await API.patch(`blog/${id}`, data, {
             headers: {
                   "Authorization" : localStorage.getItem('jwt'),
                   "Content-Type" : "multipart/form-data"

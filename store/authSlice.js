@@ -51,7 +51,13 @@ export function login(data){
       try {
             const response = await API.post('login',data)    
       if(response.status === 200 && response.data.token){
-            dispatch(setToken(response.data.token))
+            const token = response.data.token;
+        dispatch(setToken(token)); // Save token in Redux state
+
+        // Save the token in localStorage so it persists across page reloads
+        localStorage.setItem("jwt", token);
+
+            // dispatch(setToken(response.data.token))
             dispatch(setStatus(STATUSES.SUCCESS))
       }else{
             dispatch(setStatus(STATUSES.ERROR))
@@ -61,4 +67,4 @@ export function login(data){
             dispatch(setStatus(STATUSES.ERROR))
       }
   }
-}
+}  

@@ -14,18 +14,34 @@ const Login = () => {
 	dispatch(login(data))
   }
 
-  useEffect(()=>{
-    // check the status value
-  // status--> Success --> navigate to login page esle
-  if(status === STATUSES.SUCCESS){
-    navigate('/')
-    dispatch(setStatus(null))
-  }
-  // else{
+  // useEffect(()=>{
+  //   // check the status value
+  // // status--> Success --> navigate to login page esle
+  // if(status === STATUSES.SUCCESS){
+  //   navigate('/')
+  //   dispatch(setStatus(null))
+  // }else{
   //   navigate('/login')
   // }
-  },[status])
+  // },[status, navigate, dispatch])
+  
 
+  useEffect(() => {
+    // Check if the user is already logged in (token exists)
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      navigate("/"); // If the token is present, redirect to the home page
+      return;
+    }
+
+    // After login success, redirect to home page
+    if (status === STATUSES.SUCCESS) {
+      navigate("/");
+      dispatch(setStatus(null)); // Clear status after navigation
+    }
+  }, [status, navigate, dispatch]);
+
+  
   return (
 	<Form type="Login" user={user} onSubmit={handleLogin} />
   )
