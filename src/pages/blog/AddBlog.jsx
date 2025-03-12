@@ -12,6 +12,11 @@ const AddBlog = () => {
   const navigate = useNavigate()
   const { status } = useSelector((state) => state.blog)
   const dispatch = useDispatch()
+  
+  // Reset status when the component mounts
+  useEffect(() => {
+    dispatch(setStatus({ key: 'add', value: STATUSES.IDLE }));
+  }, [dispatch]);
 
    const handleAddBlog = (data) => {
     dispatch(addBlog(data))
@@ -19,11 +24,12 @@ const AddBlog = () => {
 
      // Navigate to home page **only after submitting a blog**
      useEffect(()=> {
-      if(status === STATUSES.SUCCESS){
-        dispatch(setStatus(null))
+      if(status.add === STATUSES.SUCCESS){
+        console.log("Blog successfully created! Navigating to home.")
+        dispatch(setStatus({ key: 'add', value: STATUSES.IDLE }));
         navigate("/")
       }
-    },[status, dispatch, navigate])
+    },[status.add, dispatch, navigate])
 
   return (
       <Layout>

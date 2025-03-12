@@ -5,22 +5,18 @@ import Layout from '../../components/layout/Layout'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { deleteBlog, fetchSingleBlog, setStatus,selectSingleBlog } from '../../../store/blogSlice'
+import STATUSES from '../../globals/status/statuses'
 
 const SingleBlog = () => {
     const {id} = useParams()
     // const {data: blogs = {}, status, deleteStatus } = useSelector((store) => store.blogs || {})    
     
-        // ✅ Use memoized selector
+        //  Use memoized selector
         const blog = useSelector(selectSingleBlog);
         const status = useSelector((state) => state.blog.status);
-        const deleteStatus = useSelector((state) => state.blog.deleteStatus);
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    
-    // useEffect(() => {
-    //     dispatch(fetchSingleBlog(id))
-    //   }, [id, dispatch])
 
     useEffect(() => {
         if (!blog || blog._id !== id) {
@@ -33,15 +29,17 @@ const SingleBlog = () => {
       }
 
       useEffect(() => {
-        if (deleteStatus === true) {
-          dispatch(setStatus(null))
-          navigate("/")
+        if (status.delete === STATUSES.SUCCESS) {
+          // Reset delete status first
+          dispatch(setStatus({ key: 'delete', value: STATUSES.IDLE }));
+          // Then navigate
+          navigate("/");
         }
-      }, [deleteStatus, dispatch, navigate])
+      }, [status.delete, dispatch, navigate]);
 
-      if (status === "loading") {
+      if (status.fetchSingle === STATUSES.LOADING) {
         return <div className="text-center text-xl mt-10">Loading...</div>;
-    }
+      }
 
     if (!blog) {
         return <div className="text-center text-xl mt-10">Blog not found.</div>;
@@ -61,7 +59,14 @@ const SingleBlog = () => {
                         {/* <Link to={`/blog/edit/${id}`}>
                         <button className="w-full bg-gray-900 dark:bg-gray-600 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800 dark:hover:bg-gray-700">Edit</button>
                         </Link> */}
-                        <button className="w-full bg-gray-900 dark:bg-gray-600 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800 dark:hover:bg-gray-700" onClick={()=>navigate(`/blog/edit/${blog._id}`)}>Edit</button>
+                        <button className="w-full bg-gray-900 dark:bg-gray-600 text-white py-2 px-4 rounded-full font-bold hover:bg-gray-800 dark:hover:bg-gray-700" 
+                        // onClick={()=>navigate(`/blog/edit/${blog._id}`)}
+                        onClick={() => {
+                            // Clear previous edit state
+                            dispatch(setStatus({ key: 'fetchSingle', value: STATUSES.IDLE }));
+                            navigate(`/blog/edit/${blog._id}`)
+                          }}
+                        >Edit</button>
                     </div>
                     <div className="w-1/2 px-2">
                         <button className="w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white py-2 px-4 rounded-full font-bold hover:bg-gray-300 dark:hover:bg-gray-600" onClick={handleDelete}>Delete</button>

@@ -13,19 +13,7 @@ const Login = () => {
   const handleLogin = (data) => {
 	dispatch(login(data))
   }
-
-  // useEffect(()=>{
-  //   // check the status value
-  // // status--> Success --> navigate to login page esle
-  // if(status === STATUSES.SUCCESS){
-  //   navigate('/')
-  //   dispatch(setStatus(null))
-  // }else{
-  //   navigate('/login')
-  // }
-  // },[status, navigate, dispatch])
   
-
   useEffect(() => {
     // Check if the user is already logged in (token exists)
     const token = localStorage.getItem("jwt");
