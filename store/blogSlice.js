@@ -154,25 +154,26 @@ export function editBlog(id, data) {
       formData.append('category', data.category)
       formData.append('description', data.description)
       
-       // Handle image upload properly
+       // Always append imageUrl (existing or new)
        if (data.image instanceof File) {
-        formData.append('image', data.image); // For new uploads
+        formData.append('image', data.image);
+      } else {
+        formData.append('imageUrl', data.imageUrl);
       }
-      // Don't send anything if keeping existing image
-
 
           const response = await API.patch(`blog/${id}`, formData, {
             headers: {
                   'Authorization': `${token}`,
-                  "Content-Type" : "multipart/form-data"
+                  // "Content-Type" : "multipart/form-data"
             }
           })
 
           console.log("Edit Response:", response.data); // Debug log
     
           if (response.status === 200) {
+            // Update the singleBlog state directly with the response data
+            dispatch(setSingleBlog(response.data.data));
             dispatch(setStatus({ key: 'edit', value: STATUSES.SUCCESS }))
-            dispatch(fetchSingleBlog(id)) // Refresh single blog data
           } else {
             dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }))
           }

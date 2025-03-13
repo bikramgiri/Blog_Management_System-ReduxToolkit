@@ -8,6 +8,7 @@ import { editBlog, fetchSingleBlog, setSingleBlog, setStatus } from '../../../st
 import STATUSES from '../../globals/status/statuses'
 
 const EditBlog = () => {
+  const token = localStorage.getItem('jwt')
   const {singleBlog,status} = useSelector(state => state.blog)
   const {id} = useParams()
   const navigate = useNavigate()
@@ -33,7 +34,6 @@ const EditBlog = () => {
     dispatch(fetchSingleBlog(id))
   }, [dispatch, id])
 
-    // Update local state when singleBlog changes
   useEffect(() => {
     if (singleBlog && status.fetchSingle === STATUSES.SUCCESS) {
       setBlog({
@@ -41,15 +41,15 @@ const EditBlog = () => {
         subtitle: singleBlog.subtitle,
         category: singleBlog.category,
         description: singleBlog.description,
-        image: singleBlog.image // Match API response field name
+        image: singleBlog.imageUrl // Use imageUrl instead of image
       });
     }
   }, [singleBlog, status.fetchSingle])
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target
-    setBlog(prev => ({
-      ...prev,
+    setBlog(blog => ({
+      ...blog,
       [name]: type === "file" ? files[0] : value
     }))
   }
@@ -60,33 +60,39 @@ const EditBlog = () => {
   
   useEffect(() => {
     if (status.edit === STATUSES.SUCCESS) {
-      dispatch(setStatus({ key: 'edit', value: STATUSES.IDLE }))
-      navigate(`/blog/${id}`)
+      // Navigate immediately; data is already updated via setSingleBlog
+      navigate(`/blog/${id}`);
+      dispatch(setStatus({ key: 'edit', value: STATUSES.IDLE }));
     }
-  }, [status.edit, dispatch, navigate, id])
-
+  }, [status.edit, navigate, id, dispatch]);
+  
   useEffect(() => {
     if (status.edit === STATUSES.ERROR) {
       alert("Failed to update blog. Please try again.");
     }
-  }, [status.edit]);
+  }, [status.edit])
+
+
+  if(!token){
+      return <h1>Please login!</h1>
+}
   
   return (
     <Layout>
     {status.fetchSingle === STATUSES.SUCCESS && (
         <Form
-          type="edit"
-          onSubmit={handleEditBlog}
-          onChange={handleChange}
-          value={blog}
-          initialValues={{
-            title: singleBlog.title,
-            subtitle: singleBlog.subtitle,
-            category: singleBlog.category,
-            description: singleBlog.description,
-            image: singleBlog.imageUrl // Pass the image URL from API
-          }}
-        />
+        type="edit"
+        onSubmit={handleEditBlog}
+        onChange={handleChange}
+        value={blog}
+        initialValues={{
+    title: singleBlog?.title,
+    subtitle: singleBlog?.subtitle,
+    category: singleBlog?.category,
+    description: singleBlog?.description,
+    imageUrl: singleBlog?.imageUrl // CORRECT FIELD NAME
+  }}
+      />
       )}
   </Layout>    
   )

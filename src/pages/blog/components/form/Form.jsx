@@ -20,8 +20,8 @@ const Form = ({ type, onSubmit, initialValues }) => {
 		    subtitle: initialValues.subtitle,
 		    category: initialValues.category,
 		    description: initialValues.description,
-		    image: initialValues.image,
-		    imagePreview: initialValues.image // Show existing image
+		    image: initialValues.imageUrl, // Initialize with imageUrl
+		    imagePreview: initialValues.imageUrl
 		  });
 		}
 	    }, [initialValues])
@@ -40,16 +40,15 @@ const Form = ({ type, onSubmit, initialValues }) => {
 		}
 	    }
 
-	    const handleSubmit = (e) => {
+	const handleSubmit = (e) => {
 		e.preventDefault();
-		// Remove image from required fields
-		if (!blog.title || !blog.subtitle || !blog.category || !blog.description) {
-		  alert('Please fill in all required fields');
-		  return;
-		}
-		onSubmit(blog);
-	    }
-  
+		const payload = {
+		  ...blog,
+		  imageUrl: blog.image instanceof File ? undefined : blog.imagePreview
+		};
+		onSubmit(payload);
+	    };
+	    
 
   return (
       <div className="flex justify-center w-screen h-screen">
@@ -64,22 +63,14 @@ const Form = ({ type, onSubmit, initialValues }) => {
 				<input className="w-full bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                         type="text" placeholder="Subtitle*" name="subtitle" value={blog.subtitle} onChange={handleChange} required/>
 				<input className="w-full bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
-                        type="file" name="image" accept="image/*" onChange={handleChange} required />
-				{/* {blog.imagePreview && (
-                        <img src={blog.imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg mt-2" />
-                        )} */}
-				  {/* {blog.imagePreview ? (
-                           <img src={blog.imagePreview} />
-                            ) : blog.image ? (
-                               <img src={blog.image} /> // Show existing image if no preview
-                                ) : null} */}
-					  {initialValues?.image && !blog.imagePreview && (
-  <img 
-    src={initialValues.image} 
-    alt="Current" 
-    className="w-32 h-32 object-cover rounded-lg mt-2"
-  />
-)}
+                        type="file" name="image" accept="image/*" onChange={handleChange} required={type !== 'edit'} />
+				
+                        {initialValues?.imageUrl && !blog.imagePreview && (
+                        <img src={initialValues.imageUrl} alt="Current" />
+                       )}
+                        {blog.imagePreview && (
+                        <img src={blog.imagePreview} alt="Preview" />
+                        )}
 				<input className="w-full bg-gray-100 text-gray-900 mt-2 p-3 rounded-lg focus:outline-none focus:shadow-outline"
                         type="text" placeholder="Category*" name="category" value={blog.category} onChange={handleChange} required/>
                   </div>
@@ -106,7 +97,7 @@ Form.propTypes = {
 	  subtitle: PropTypes.string,
 	  category: PropTypes.string,
 	  description: PropTypes.string,
-	  image: PropTypes.oneOfType([
+	  imageUrl: PropTypes.oneOfType([
 	    PropTypes.string,
 	    PropTypes.instanceOf(File)
 	  ])
