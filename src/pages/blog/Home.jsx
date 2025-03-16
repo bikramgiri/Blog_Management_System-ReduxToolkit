@@ -6,10 +6,11 @@ import { fetchBlog } from '../../../store/blogSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
 const Home = () => {
+  // throw new Error('Error in Home Page')
   const dispatch = useDispatch()
   const blogs = useSelector((state) => state.blog.blogs)  // Correct key
   
-  // ✅ Memoize blogs to prevent unnecessary re-renders
+  // Memoize blogs to prevent unnecessary re-renders
   const memoizedBlogs = useMemo(() => blogs, [blogs])
 
   useEffect(() => {
