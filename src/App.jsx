@@ -13,6 +13,7 @@ import Protected from './Protected'
 import { lazy, Suspense } from 'react'
 import PropTypes from 'prop-types'
 import { ErrorBoundary } from 'react-error-boundary'
+import Parent from './pages/useCallback/Parent'
 
 const SingleBlog = lazy(()=>import('./pages/blog/SingleBlog'))
 const Register = lazy(()=>import('./pages/auth/Register'))
@@ -40,6 +41,7 @@ function App() {
       <Route path="/blog/add" element={<Protected><AddBlog /></Protected>} />
       <Route path="/blog/edit/:id" element={<Protected><EditBlog /></Protected>} />
       <Route path="/blog/:id" element={<SingleBlog />} />
+      <Route path="/usecallback" element={<Parent/>} />
     </Routes>
     </Suspense>
     </ErrorBoundary>
