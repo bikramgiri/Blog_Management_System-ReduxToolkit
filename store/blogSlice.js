@@ -135,54 +135,64 @@ export function deleteBlog(id){
 
 // edit blog
 export function editBlog(id, data) {
-      // return async function editBlogThunk(dispatch) {
-        return async (dispatch) => {
-        dispatch(setStatus({ key: 'edit', value: STATUSES.LOADING }))
-       
-        const token = localStorage.getItem('jwt');
-       if (!token) {
-         // Token is not found, handle the error
-         dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR}))
-         console.log('No token found. Please login.');
-         return // Exit the function as token is required for the request
-       }
-        
-        try {
-          const formData = new FormData()
-      formData.append('title', data.title)
-      formData.append('subtitle', data.subtitle)
-      formData.append('category', data.category)
-      formData.append('description', data.description)
-      
-       // Always append imageUrl (existing or new)
-       if (data.image instanceof File) {
-        formData.append('image', data.image);
-      } else {
-        formData.append('imageUrl', data.imageUrl);
+  return async (dispatch) => {
+      dispatch(setStatus({ key: 'edit', value: STATUSES.LOADING }));
+      const token = localStorage.getItem('jwt');
+
+      if (!token) {
+          console.log("No token found");
+          dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }));
+          return;
       }
+
+      try {
+          console.log("EditBlog Payload:", data);
+
+          const formData = new FormData();
+          formData.append('title', data.title || '');
+          formData.append('subtitle', data.subtitle || '');
+          formData.append('category', data.category || '');
+          formData.append('description', data.description || '');
+
+          if (data.image instanceof File) {
+              console.log("Appending new image:", data.image.name);
+              formData.append('image', data.image);
+          } else if (data.imageUrl && data.imageUrl !== 'undefined' && data.imageUrl !== '') {
+              console.log("Appending existing imageUrl:", data.imageUrl);
+              formData.append('imageUrl', data.imageUrl);
+          } else {
+              console.log("No image or imageUrl provided");
+              formData.append('imageUrl', ''); // Ensure imageUrl is sent to avoid undefined
+          }
 
           const response = await API.patch(`blog/${id}`, formData, {
-            headers: {
-                  'Authorization': `${token}`,
-                  // "Content-Type" : "multipart/form-data"
-            }
-          })
+              headers: {
+                  Authorization: `${token}`,
+              },
+          });
 
-          console.log("Edit Response:", response.data); // Debug log
-    
+          console.log("EditBlog Response:", response.data);
+
           if (response.status === 200) {
-            // Update the singleBlog state directly with the response data
-            dispatch(setSingleBlog(response.data.data));
-            dispatch(setStatus({ key: 'edit', value: STATUSES.SUCCESS }))
+              if (response.data.data) {
+                  console.log("Updating singleBlog with response data:", response.data.data);
+                  dispatch(setSingleBlog(response.data.data));
+                  dispatch(setStatus({ key: 'edit', value: STATUSES.SUCCESS }));
+              } else {
+                  console.log("No updated blog data in response, refetching");
+                  await dispatch(fetchSingleBlog(id));
+                  dispatch(setStatus({ key: 'edit', value: STATUSES.SUCCESS }));
+              }
           } else {
-            dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }))
+              console.log("Unexpected response status:", response.status);
+              dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }));
           }
-        } catch (error) {
-          console.error("Edit error:", error.response?.data); // Debug log
-          dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }))
-        }
+      } catch (error) {
+          console.error("EditBlog Error:", error.response?.data || error.message);
+          dispatch(setStatus({ key: 'edit', value: STATUSES.ERROR }));
       }
-    }
+  };
+}
     
 //fetch singleblog
 export function fetchSingleBlog(id) {
